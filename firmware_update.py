@@ -1,3 +1,4 @@
+from importlib.resources import open_binary
 from io import BytesIO
 import os
 from time import sleep, time
@@ -7,6 +8,7 @@ import spdlog as spd
 import zipfile
 import shutil
 import urllib
+from pathlib import Path
 
 MAX_SIZE = 1024 * 1024 * 1
 MAX_FILES = 0
@@ -120,6 +122,13 @@ def check_network_connection(rebooting = False):
     
 def get_version():
     method_name = 'get_version'
+    
+    if not os.path.exists('version.txt'):
+        firmware_logger.info("[" + method_name + "] Make version.txt")
+        f = open(os.getcwd() + "/version.txt", "w")
+        f.write('0.0.0')
+        f.close()
+    
     f = open(os.getcwd() + "/version.txt", "r")
     firmware_logger.info("[" + method_name + "] Read version.txt")
     lines = f.readlines()
