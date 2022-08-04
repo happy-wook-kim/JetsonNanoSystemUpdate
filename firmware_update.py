@@ -35,7 +35,6 @@ def download_extract_zip(url):
         else: # 다운로드 성공한 경우 
             file_size = req.headers["Content-Length"]
             file_type = req.headers["Content-Type"]
-            print(req.headers)
             
             # 100MB 이상 파일에 한해서 다운로드 진행(다운로드 유효성 검사)
             if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 150  :
@@ -72,6 +71,7 @@ def makedir(directory):
         os.makedirs(directory)
         firmware_logger.info("[" + method_name + "] Make 'saved' folder")
 
+
 def is_firmware_latest():
     method_name = "is_firmware_latest"
     latest_version = "1.1.0"
@@ -97,6 +97,7 @@ def is_network_connected():
         firmware_logger.error("[" + method_name + "] internet not connected")
         return False
     
+    
 def get_version():
     method_name = 'get_version'
     f = open(os.getcwd() + "/version.txt", "r")
@@ -107,6 +108,7 @@ def get_version():
     f.close()
     return line
 
+
 def write_latest_version(latest_version):
     method_name = "write_latest_version"
     firmware_logger.info("[" + method_name + "] Rewrite version.txt")
@@ -114,6 +116,7 @@ def write_latest_version(latest_version):
     f = open(os.getcwd() + "/version.txt", "w")
     f.write(latest_version) 
     f.close()
+
 
 if __name__ == "__main__":
     # 네트워크 살아있는지 확인
