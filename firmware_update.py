@@ -1,6 +1,6 @@
 from io import BytesIO
 import os
-from time import time
+from time import sleep, time
 from tkinter import EXCEPTION
 import requests
 import spdlog as spd
@@ -32,11 +32,11 @@ def download_extract_zip(url):
             makedir('saved')
         except Exception as e:
             firmware_logger.error("[" + method_name + "] Failed to download new firmware")    
-        else: # 다운로드 성공한 경우 
+        else: # Success downloading
             file_size = req.headers["Content-Length"]
             file_type = req.headers["Content-Type"]
             
-            # 100MB 이상 파일에 한해서 다운로드 진행(다운로드 유효성 검사)
+            # Try to download what latest firmware is bigger than 150MB(check firmware validation)
             if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 150  :
                 # extracting the zip file contents
                 zip = zipfile.ZipFile(BytesIO(req.content))
@@ -75,8 +75,8 @@ def makedir(directory):
 def is_firmware_latest():
     method_name = "is_firmware_latest"
     latest_version = "1.1.0"
-    # API 를 통해 버전을 받아온다.
-    #latest_version = API()
+    # get latest version from Server API
+    # latest_version = API()
     try :
         firmware_logger.info("[" + method_name + "] Get versions list")    
         return latest_version
@@ -97,6 +97,26 @@ def is_network_connected():
         firmware_logger.error("[" + method_name + "] internet not connected")
         return False
     
+def check_network_connection(rebooting = False):
+    # check network and reboot
+    firmware_logger.info('[check_network_connection] checking network conneced')
+    check_repeat_count = 0
+    max_check_repeat_count = 10
+    sleep_second = 5
+    while(True) :
+        # repeat about max_check_repeat_count
+        if check_repeat_count ==  ( max_check_repeat_count - 1 ) :
+            firmware_logger.error('[check_network_connection] internet is not connected... rebooting')
+            if rebooting :
+                os.system('reboot')
+            else :
+                break
+        connected = is_network_connected()
+        if connected :
+            return True
+        sleep(sleep_second)
+        check_repeat_count += 1
+    return False
     
 def get_version():
     method_name = 'get_version'
@@ -104,7 +124,7 @@ def get_version():
     firmware_logger.info("[" + method_name + "] Read version.txt")
     lines = f.readlines()
     for line in lines:
-        line = line.strip()  # 줄 끝의 줄 
+        line = line.strip()  # last line 
     f.close()
     return line
 
@@ -119,8 +139,8 @@ def write_latest_version(latest_version):
 
 
 if __name__ == "__main__":
-    # 네트워크 살아있는지 확인
-    if is_network_connected() :
+    # check network is alived
+    if check_network_connection() :
         version = get_version()
         update_url = SERVER_IP + DOWNLOAD_PATH
         latest_version = is_firmware_latest()
