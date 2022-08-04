@@ -1,4 +1,3 @@
-from importlib.resources import open_binary
 from io import BytesIO
 import os
 from time import sleep, time
@@ -22,18 +21,21 @@ DOWNLOAD_PATH = "versions/"
 def download_extract_zip(url):
     method_name = "download_extract_zip"
 
-    # 펌웨어 버전 최신인지 확인
+    # check firmware version is latest
     if version != latest_version:
 
         firmware_logger.info("[" + method_name + "] Try to download version: '" + latest_version + "' code")
+        firmware_logger.flush()
         # Downloading the file by sending the request to the URL
         try :
             download_url = url + latest_version + '/code.zip'
             req = requests.get(download_url)
             firmware_logger.info("[" + method_name + "] Downloading Completed")
+            firmware_logger.flush()
             makedir('saved')
         except Exception as e:
-            firmware_logger.error("[" + method_name + "] Failed to download new firmware")    
+            firmware_logger.error("[" + method_name + "] Failed to download new firmware") 
+            firmware_logger.flush()   
         else: # Success downloading
             file_size = req.headers["Content-Length"]
             file_type = req.headers["Content-Type"]
@@ -44,10 +46,12 @@ def download_extract_zip(url):
                 zip = zipfile.ZipFile(BytesIO(req.content))
                 zip.extractall(extract_path)
                 firmware_logger.info("[" + method_name + "] Extract zip file")
+                firmware_logger.flush()
                 
                 # get files from extrated folder
                 extract_files = os.listdir(extract_path)
                 firmware_logger.info("[" + method_name + "] Get file list")
+                firmware_logger.flush()
                 
                 # replace files from extracted file to original folder
                 for extract_file_name in extract_files :
@@ -57,14 +61,18 @@ def download_extract_zip(url):
 
                 shutil.rmtree(os.getcwd() + '/saved', ignore_errors=True)
                 firmware_logger.info("[" + method_name + "] Delete 'saved' folder")
+                firmware_logger.flush()
                 shutil.rmtree(os.getcwd() + '/code.zip', ignore_errors=True)
                 firmware_logger.info("[" + method_name + "] Delete zip file")
+                firmware_logger.flush()
                 
                 write_latest_version(latest_version)
                 firmware_logger.info("[" + method_name + "] Start to Reboot!!!")
+                firmware_logger.flush()
                 # os.system("sudo shutdown -r now")
             else :
-                firmware_logger.warn("[" + method_name + "] File is not 'zip' type or file is smaller than 100MB") 
+                firmware_logger.error("[" + method_name + "] File is not 'zip' type or file is smaller than 100MB") 
+                firmware_logger.flush()
         
 
 def makedir(directory):
@@ -72,6 +80,7 @@ def makedir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
         firmware_logger.info("[" + method_name + "] Make 'saved' folder")
+        firmware_logger.flush()
 
 
 def is_firmware_latest():
@@ -81,9 +90,11 @@ def is_firmware_latest():
     # latest_version = API()
     try :
         firmware_logger.info("[" + method_name + "] Get versions list")    
+        firmware_logger.flush()
         return latest_version
     except Exception as e:
         firmware_logger.error("[" + method_name + "] Failed to get version list, " +  str(e))
+        firmware_logger.flush()
 
 
 def is_network_connected():
@@ -91,24 +102,29 @@ def is_network_connected():
     # check internet
     test_url = 'http://google.com'
     firmware_logger.info("[" + method_name + "] connecting to <{}> for internet connection test".format(test_url))
+    firmware_logger.flush()
     try :
         urllib.request.urlopen(test_url)
         firmware_logger.info("[" + method_name + "] internet connected")
+        firmware_logger.flush()
         return True
     except :
         firmware_logger.error("[" + method_name + "] internet not connected")
+        firmware_logger.flush()
         return False
     
 def check_network_connection(rebooting = False):
     # check network and reboot
     firmware_logger.info('[check_network_connection] checking network conneced')
+    firmware_logger.flush()
     check_repeat_count = 0
     max_check_repeat_count = 10
-    sleep_second = 5
+    sleep_second = 30
     while(True) :
         # repeat about max_check_repeat_count
         if check_repeat_count ==  ( max_check_repeat_count - 1 ) :
             firmware_logger.error('[check_network_connection] internet is not connected... rebooting')
+            firmware_logger.flush()
             if rebooting :
                 os.system('reboot')
             else :
@@ -125,12 +141,14 @@ def get_version():
     
     if not os.path.exists('version.txt'):
         firmware_logger.info("[" + method_name + "] Make version.txt")
+        firmware_logger.flush()
         f = open(os.getcwd() + "/version.txt", "w")
         f.write('0.0.0')
         f.close()
     
     f = open(os.getcwd() + "/version.txt", "r")
     firmware_logger.info("[" + method_name + "] Read version.txt")
+    firmware_logger.flush()
     lines = f.readlines()
     for line in lines:
         line = line.strip()  # last line 
@@ -141,6 +159,7 @@ def get_version():
 def write_latest_version(latest_version):
     method_name = "write_latest_version"
     firmware_logger.info("[" + method_name + "] Rewrite version.txt")
+    firmware_logger.flush()
     shutil.rmtree(os.getcwd() + '/version.txt', ignore_errors=True)
     f = open(os.getcwd() + "/version.txt", "w")
     f.write(latest_version) 
