@@ -14,7 +14,9 @@ MAX_FILES = 0
 version = ""
 latest_version = ""
 extract_path = os.path.join(os.getcwd(), 'saved')
-firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", "ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
+if not os.path.isdir('ADDDI_LOGS'):
+    os.mkdir('ADDDI_LOGS')
+firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", "ADDDI_LOGS/ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
 SERVER_IP = "http://132.226.227.252/"
 DOWNLOAD_PATH = "versions/"
 
@@ -69,11 +71,15 @@ def download_extract_zip(url):
                 write_latest_version(latest_version)
                 firmware_logger.info("[" + method_name + "] Start to Reboot!!!")
                 firmware_logger.flush()
-                # os.system("sudo shutdown -r now")
+                os.system("sudo shutdown -r now")
             else :
                 firmware_logger.error("[" + method_name + "] File is not 'zip' type or file is smaller than 100MB") 
                 firmware_logger.flush()
-        
+    else :
+        firmware_logger.info('[{}] Current version is latest version'.format(method_name))
+        firmware_logger.info('[{}] Starting Main APP'.format(method_name))
+        firmware_logger.flush()
+        os.system('python3 /home/addd-jetson/FastMOT/app.py')
 
 def makedir(directory):
     method_name = "makedir"
@@ -126,7 +132,7 @@ def check_network_connection(rebooting = False):
             firmware_logger.error('[check_network_connection] internet is not connected... rebooting')
             firmware_logger.flush()
             if rebooting :
-                os.system('reboot')
+                os.system('sudo reboot')
             else :
                 break
         connected = is_network_connected()
