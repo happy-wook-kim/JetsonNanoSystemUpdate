@@ -17,8 +17,8 @@ extract_path = os.path.join(os.getcwd(), 'saved')
 if not os.path.isdir('ADDDI_LOGS'):
     os.mkdir('ADDDI_LOGS')
 firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", "ADDDI_LOGS/ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
-SERVER_IP = "http://118.67.142.214/mnt/xvdb/adddi_data/"
-DOWNLOAD_PATH = "versions/"
+SERVER_IP = "http://118.67.142.214"
+DOWNLOAD_PATH = "/mnt/xvdb/adddi_data/versions/"
 FILE_NAME = 'code'
 
 def download_extract_zip(url):
@@ -44,7 +44,8 @@ def download_extract_zip(url):
             file_type = req.headers["Content-Type"]
             
             # Try to download what latest firmware is bigger than 150MB(check firmware validation)
-            if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 150  :
+            if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 500  :
+            # if file_type == "application/zip":
                 # extracting the zip file contents
                 zip = zipfile.ZipFile(BytesIO(req.content))
                 zip.extractall(extract_path)
@@ -70,6 +71,10 @@ def download_extract_zip(url):
                 firmware_logger.flush()
                 
                 write_latest_version(latest_version)
+                firmware_logger.info("[" + method_name + "] Start to Update!")
+                firmware_logger.flush()
+                os.system('bash /home/addd/FastMOT/update.sh')
+                
                 firmware_logger.info("[" + method_name + "] Start to Reboot!!!")
                 firmware_logger.flush()
                 os.system("sudo shutdown -r now")
@@ -80,7 +85,7 @@ def download_extract_zip(url):
         firmware_logger.info('[{}] Current version is latest version'.format(method_name))
         firmware_logger.info('[{}] Starting Main APP'.format(method_name))
         firmware_logger.flush()
-        os.system('python3 /home/addd-jetson/FastMOT/app.py')
+        os.system('bash /home/addd/FastMOT/start.sh')
 
 def makedir(directory):
     method_name = "makedir"
