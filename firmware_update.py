@@ -17,8 +17,9 @@ extract_path = os.path.join(os.getcwd(), 'saved')
 if not os.path.isdir('ADDDI_LOGS'):
     os.mkdir('ADDDI_LOGS')
 firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", "ADDDI_LOGS/ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
-SERVER_IP = "http://132.226.227.252/"
+SERVER_IP = "http://118.67.142.214/mnt/xvdb/adddi_data/"
 DOWNLOAD_PATH = "versions/"
+FILE_NAME = 'code'
 
 def download_extract_zip(url):
     method_name = "download_extract_zip"
@@ -30,7 +31,7 @@ def download_extract_zip(url):
         firmware_logger.flush()
         # Downloading the file by sending the request to the URL
         try :
-            download_url = url + latest_version + '/code.zip'
+            download_url = url + latest_version + '/' + FILE_NAME + '.zip'
             req = requests.get(download_url)
             firmware_logger.info("[" + method_name + "] Downloading Completed")
             firmware_logger.flush()
@@ -91,7 +92,7 @@ def makedir(directory):
 
 def is_firmware_latest():
     method_name = "is_firmware_latest"
-    latest_version = "1.1.0"
+    latest_version = "1.0.0"
     # get latest version from Server API
     # latest_version = API()
     try :
