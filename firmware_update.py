@@ -9,14 +9,15 @@ import shutil
 import urllib
 from pathlib import Path
 
+WORK_DIRECTORY = "/home/addd"
 MAX_SIZE = 1024 * 1024 * 1
 MAX_FILES = 0
 version = ""
 latest_version = ""
-extract_path = os.path.join(os.getcwd(), 'saved')
-if not os.path.isdir('ADDDI_LOGS'):
-    os.mkdir('ADDDI_LOGS')
-firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", "ADDDI_LOGS/ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
+extract_path = os.path.join(WORK_DIRECTORY, 'saved')
+if not os.path.isdir(WORK_DIRECTORY + '/ADDDI_LOGS'):
+    os.mkdir(WORK_DIRECTORY + '/ADDDI_LOGS')
+firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", WORK_DIRECTORY + "/ADDDI_LOGS/ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
 SERVER_IP = "http://118.67.142.214"
 DOWNLOAD_PATH = "/mnt/xvdb/adddi_data/versions/"
 FILE_NAME = 'code'
@@ -35,7 +36,7 @@ def download_extract_zip(url):
             req = requests.get(download_url)
             firmware_logger.info("[" + method_name + "] Downloading Completed")
             firmware_logger.flush()
-            makedir('saved')
+            makedir(WORK_DIRECTORY + '/saved')
         except Exception as e:
             firmware_logger.error("[" + method_name + "] Failed to download new firmware") 
             firmware_logger.flush()   
@@ -44,7 +45,7 @@ def download_extract_zip(url):
             file_type = req.headers["Content-Type"]
             
             # Try to download what latest firmware is bigger than 150MB(check firmware validation)
-            if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 500  :
+            if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 900  :
             # if file_type == "application/zip":
                 # extracting the zip file contents
                 zip = zipfile.ZipFile(BytesIO(req.content))
@@ -60,13 +61,13 @@ def download_extract_zip(url):
                 # replace files from extracted file to original folder
                 for extract_file_name in extract_files :
                     if not 'MAC' in extract_file_name:
-                        os.replace(os.path.join(extract_path, extract_file_name), os.path.join(os.getcwd(), extract_file_name))
+                        os.replace(os.path.join(extract_path, extract_file_name), os.path.join(WORK_DIRECTORY, extract_file_name))
                         firmware_logger.info("[" + method_name + "] Replace old code(" + extract_file_name + ") with new code")
 
-                shutil.rmtree(os.getcwd() + '/saved', ignore_errors=True)
+                shutil.rmtree(WORK_DIRECTORY + '/saved', ignore_errors=True)
                 firmware_logger.info("[" + method_name + "] Delete 'saved' folder")
                 firmware_logger.flush()
-                shutil.rmtree(os.getcwd() + '/code.zip', ignore_errors=True)
+                shutil.rmtree(WORK_DIRECTORY + '/' + FILE_NAME + '.zip', ignore_errors=True)
                 firmware_logger.info("[" + method_name + "] Delete zip file")
                 firmware_logger.flush()
                 
@@ -151,14 +152,14 @@ def check_network_connection(rebooting = False):
 def get_version():
     method_name = 'get_version'
     
-    if not os.path.exists('version.txt'):
+    if not os.path.exists(WORK_DIRECTORY + '/version.txt'):
         firmware_logger.info("[" + method_name + "] Make version.txt")
         firmware_logger.flush()
-        f = open(os.getcwd() + "/version.txt", "w")
+        f = open(WORK_DIRECTORY + "/version.txt", "w")
         f.write('0.0.0')
         f.close()
     
-    f = open(os.getcwd() + "/version.txt", "r")
+    f = open(WORK_DIRECTORY + "/version.txt", "r")
     firmware_logger.info("[" + method_name + "] Read version.txt")
     firmware_logger.flush()
     lines = f.readlines()
@@ -172,8 +173,8 @@ def write_latest_version(latest_version):
     method_name = "write_latest_version"
     firmware_logger.info("[" + method_name + "] Rewrite version.txt")
     firmware_logger.flush()
-    shutil.rmtree(os.getcwd() + '/version.txt', ignore_errors=True)
-    f = open(os.getcwd() + "/version.txt", "w")
+    shutil.rmtree(WORK_DIRECTORY + '/version.txt', ignore_errors=True)
+    f = open(WORK_DIRECTORY + "/version.txt", "w")
     f.write(latest_version) 
     f.close()
 
