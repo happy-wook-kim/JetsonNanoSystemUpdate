@@ -20,6 +20,7 @@ if not os.path.isdir(WORK_DIRECTORY + '/ADDDI_LOGS'):
 firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", WORK_DIRECTORY + "/ADDDI_LOGS/ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
 SERVER_IP = "http://118.67.142.214"
 DOWNLOAD_PATH = "/mnt/xvdb/adddi_data/versions/"
+VERSIONS_PATH = SERVER_IP + "/mnt/svdb/adddi_data/versions.txt"
 FILE_NAME = 'code'
 
 def download_extract_zip(url):
@@ -96,15 +97,28 @@ def makedir(directory):
         firmware_logger.flush()
 
 
-def is_firmware_latest():
+def is_firmware_latest(file_url):
     method_name = "is_firmware_latest"
-    latest_version = "1.0.0"
     # get latest version from Server API
     # latest_version = API()
     try :
-        firmware_logger.info("[" + method_name + "] Get versions list")    
-        firmware_logger.flush()
-        return latest_version
+        try :
+            firmware_logger.info("[" + method_name + "] Try to get versions list")    
+            firmware_logger.flush()
+            response = urllib.request.urlopen(file_url)
+            data = response.read()
+            text = []
+            text.append(data.decode('utf-8'))
+            latest_version = text[0]
+            print(latest_version)
+            print(text)
+        except Exception as e:
+            firmware_logger.error("[" + method_name + "] Failed to get version list, " +  str(e))  
+            firmware_logger.flush()
+        else:
+            firmware_logger.info("[" + method_name + "] Get versions list")    
+            firmware_logger.flush()
+            return latest_version
     except Exception as e:
         firmware_logger.error("[" + method_name + "] Failed to get version list, " +  str(e))
         firmware_logger.flush()
@@ -184,5 +198,5 @@ if __name__ == "__main__":
     if check_network_connection() :
         version = get_version()
         update_url = SERVER_IP + DOWNLOAD_PATH
-        latest_version = is_firmware_latest()
+        latest_version = is_firmware_latest(VERSIONS_PATH)
         download_extract_zip(update_url)
