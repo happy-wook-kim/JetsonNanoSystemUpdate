@@ -110,8 +110,6 @@ def is_firmware_latest(file_url):
             text = []
             text.append(data.decode('utf-8'))
             latest_version = text[0]
-            print(latest_version)
-            print(text)
         except Exception as e:
             firmware_logger.error("[" + method_name + "] Failed to get version list, " +  str(e))  
             firmware_logger.flush()
