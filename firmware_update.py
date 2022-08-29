@@ -75,7 +75,7 @@ def download_extract_zip(url):
                 write_latest_version(latest_version)
                 firmware_logger.info("[" + method_name + "] Start to Update!")
                 firmware_logger.flush()
-                os.system('bash /home/addd/update.sh')
+                os.system('bash ' + WORK_DIRECTORY + '/update.sh')
                 
                 firmware_logger.info("[" + method_name + "] Start to Reboot!!!")
                 firmware_logger.flush()
@@ -87,7 +87,8 @@ def download_extract_zip(url):
         firmware_logger.info('[{}] Current version is latest version'.format(method_name))
         firmware_logger.info('[{}] Starting Main APP'.format(method_name))
         firmware_logger.flush()
-        os.system('bash /home/addd/start.sh')
+        # os.system('bash ' + WORK_DIRECTORY + '/start.sh')
+        os.system(WORK_DIRECTORY + '/exe_test/dist/adddi/adddi')
 
 def makedir(directory):
     method_name = "makedir"
