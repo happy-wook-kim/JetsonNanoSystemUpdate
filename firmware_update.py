@@ -20,7 +20,7 @@ if not os.path.isdir(WORK_DIRECTORY + '/ADDDI_LOGS'):
 firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", WORK_DIRECTORY + "/ADDDI_LOGS/ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
 SERVER_IP = "http://118.67.142.214"
 DOWNLOAD_PATH = "/mnt/xvdb/adddi_data/versions/"
-VERSIONS_PATH = SERVER_IP + "/mnt/svdb/adddi_data/versions.txt"
+VERSIONS_PATH = SERVER_IP + "/mnt/xvdb/adddi_data/versions.txt"
 FILE_NAME = 'code'
 
 def download_extract_zip(url):
@@ -46,7 +46,7 @@ def download_extract_zip(url):
             file_type = req.headers["Content-Type"]
             
             # Try to download what latest firmware is bigger than 150MB(check firmware validation)
-            if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 900  :
+            if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 1  :
             # if file_type == "application/zip":
                 # extracting the zip file contents
                 zip = zipfile.ZipFile(BytesIO(req.content))
@@ -71,11 +71,14 @@ def download_extract_zip(url):
                 shutil.rmtree(WORK_DIRECTORY + '/' + FILE_NAME + '.zip', ignore_errors=True)
                 firmware_logger.info("[" + method_name + "] Delete zip file")
                 firmware_logger.flush()
+                shutil.rmtree(WORK_DIRECTORY + '/adddi', ignore_errors=True)
+                firmware_logger.info("[" + method_name + "] Delete deprecated exe file")
+                firmware_logger.flush()
                 
                 write_latest_version(latest_version)
-                firmware_logger.info("[" + method_name + "] Start to Update!")
-                firmware_logger.flush()
-                os.system('bash ' + WORK_DIRECTORY + '/update.sh')
+                # firmware_logger.info("[" + method_name + "] Start to Update!")
+                # firmware_logger.flush()
+                # os.system('bash ' + WORK_DIRECTORY + '/update.sh')
                 
                 firmware_logger.info("[" + method_name + "] Start to Reboot!!!")
                 firmware_logger.flush()
