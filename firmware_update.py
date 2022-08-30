@@ -46,7 +46,7 @@ def download_extract_zip(url):
             file_type = req.headers["Content-Type"]
             
             # Try to download what latest firmware is bigger than 150MB(check firmware validation)
-            if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 14  :
+            if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 50  :
             # if file_type == "application/zip":
                 # extracting the zip file contents
                 zip = zipfile.ZipFile(BytesIO(req.content))
@@ -68,15 +68,15 @@ def download_extract_zip(url):
                 shutil.rmtree(WORK_DIRECTORY + '/saved', ignore_errors=True)
                 firmware_logger.info("[" + method_name + "] Delete 'saved' folder")
                 firmware_logger.flush()
-
+                
                 if os.path.exists(WORK_DIRECTORY + '/' + FILE_NAME + '.zip') :
                     os.remove(WORK_DIRECTORY + '/' + FILE_NAME + '.zip')
                     firmware_logger.info("[" + method_name + "] Delete zip file")
                     firmware_logger.flush()
-                if os.path.exists(WORK_DIRECTORY + "/adddi") :
-                    os.remove(WORK_DIRECTORY + "/adddi")
-                    firmware_logger.info("[" + method_name + "] Delete deprecated exe file")
-                    firmware_logger.flush()
+                # if os.path.exists(WORK_DIRECTORY + "/adddi") :
+                #     os.remove(WORK_DIRECTORY + "/adddi")
+                #     firmware_logger.info("[" + method_name + "] Delete deprecated exe file")
+                #     firmware_logger.flush()
                 
                 write_latest_version(latest_version)
                 # firmware_logger.info("[" + method_name + "] Start to Update!")
@@ -91,10 +91,14 @@ def download_extract_zip(url):
                 firmware_logger.flush()
     else :
         firmware_logger.info('[{}] Current version is latest version'.format(method_name))
-        firmware_logger.info('[{}] Starting Main APP'.format(method_name))
         firmware_logger.flush()
         # os.system('bash ' + WORK_DIRECTORY + '/start.sh')
-        os.system(WORK_DIRECTORY + '/exe_test/dist/adddi/adddi')
+        if not oct(os.stat(WORK_DIRECTORY + '/adddi').st_mode)[-3:] == 755 :
+            os.chmod(WORK_DIRECTORY + '/adddi', 0o755)
+            firmware_logger.info('[{}] Changed file permissions to 755!'.format(method_name))
+        firmware_logger.info('[{}] Starting Main APP'.format(method_name))
+        firmware_logger.flush()
+        os.system(WORK_DIRECTORY + '/adddi')
 
 def makedir(directory):
     method_name = "makedir"
