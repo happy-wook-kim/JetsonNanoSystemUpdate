@@ -48,6 +48,10 @@ def download_extract_zip(url):
             # Try to download what latest firmware is bigger than 150MB(check firmware validation)
             if file_type == "application/zip" and int(file_size) > 1024 * 1024 * 50  :
             # if file_type == "application/zip":
+                if os.path.exists(WORK_DIRECTORY + "/adddi") :
+                    os.remove(WORK_DIRECTORY + "/adddi")
+                    firmware_logger.info("[" + method_name + "] Delete deprecated exe file")
+                    firmware_logger.flush()
                 # extracting the zip file contents
                 zip = zipfile.ZipFile(BytesIO(req.content))
                 zip.extractall(extract_path)
@@ -73,10 +77,6 @@ def download_extract_zip(url):
                     os.remove(WORK_DIRECTORY + '/' + FILE_NAME + '.zip')
                     firmware_logger.info("[" + method_name + "] Delete zip file")
                     firmware_logger.flush()
-                # if os.path.exists(WORK_DIRECTORY + "/adddi") :
-                #     os.remove(WORK_DIRECTORY + "/adddi")
-                #     firmware_logger.info("[" + method_name + "] Delete deprecated exe file")
-                #     firmware_logger.flush()
                 
                 write_latest_version(latest_version)
                 # firmware_logger.info("[" + method_name + "] Start to Update!")
