@@ -93,7 +93,7 @@ def download_extract_zip(url):
         firmware_logger.info('[{}] Current version is latest version'.format(method_name))
         firmware_logger.flush()
         # os.system('bash ' + WORK_DIRECTORY + '/start.sh')
-        if not oct(os.stat(WORK_DIRECTORY + '/adddi').st_mode)[-3:] == 755 :
+        if not oct(os.stat(WORK_DIRECTORY + '/adddi').st_mode)[-3:] == str(755) :
             os.chmod(WORK_DIRECTORY + '/adddi', 0o755)
             firmware_logger.info('[{}] Changed file permissions to 755!'.format(method_name))
         firmware_logger.info('[{}] Starting Main APP'.format(method_name))
