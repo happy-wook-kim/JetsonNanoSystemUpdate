@@ -18,7 +18,7 @@ extract_path = os.path.join(WORK_DIRECTORY, 'saved')
 if not os.path.isdir(WORK_DIRECTORY + '/ADDDI_LOGS'):
     os.mkdir(WORK_DIRECTORY + '/ADDDI_LOGS')
 firmware_logger = spd.RotatingLogger("ADDDI Jetson Nano", WORK_DIRECTORY + "/ADDDI_LOGS/ADDDI_Jetson_Nano_FirmWare_Update.log", 1, MAX_SIZE, MAX_FILES)
-SERVER_IP = "http://118.67.142.214"
+SERVER_IP = "http://*"
 DOWNLOAD_PATH = "/mnt/xvdb/adddi_data/versions/"
 VERSIONS_PATH = SERVER_IP + "/mnt/xvdb/adddi_data/versions.txt"
 FILE_NAME = 'code'
